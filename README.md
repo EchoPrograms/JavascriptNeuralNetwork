@@ -1,0 +1,1 @@
+A simple little neural network I've been working on. The only external library is Ploty so i can display functions and the output of the network more easily.
