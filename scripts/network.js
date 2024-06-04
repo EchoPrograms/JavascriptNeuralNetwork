@@ -25,7 +25,7 @@ class Network {
             testNetwork.backwardPass(new Matrix([[-5],[12],[3],[3]]))
         */
         var layer = this.networkData.activations.length - 1;
-        console.log(
+        var inverseWeightGradient = 
             Matrix.multiplyScalar(
                 Matrix.transpose(
                     Matrix.multiply(
@@ -45,7 +45,27 @@ class Network {
                 ),
                 -1
             )
-        )
+        var inverseBiasGradient = 
+            Matrix.transpose(
+                Matrix.multiplyScalar(
+                    Matrix.transpose(
+                        Matrix.multiplyScalar(
+                            Matrix.applyFunction(
+                                this.networkData.activations[layer],
+                                window[this.networkOptions.activationFunction.name + "Prime"]
+                            ),
+                            Matrix.calculateMeanSquareErrorPrime(
+                                this.networkData.activations[layer], 
+                                desiredMatrix
+                            )
+                        )
+                    ),
+                    -1
+                )
+            )
+        console.log(inverseWeightGradient)
+        console.log(inverseBiasGradient)
+        return inverseWeightGradient
     }
     calculateCostMatrix(desiredMatrix) {
         return Matrix.calculateMeanSquareError(this.networkData.activations[this.networkData.activations.length - 1], desiredMatrix);
