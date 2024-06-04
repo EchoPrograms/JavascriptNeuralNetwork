@@ -8,18 +8,40 @@ class Network {
     }
     forwardPass(inputs) {
         this.networkData.outputs = [];
+        this.networkData.activations = []
         this.networkData.inputs = new Matrix(inputs);
-        this.networkData.outputs.push(Matrix.add(Matrix.applyFunction(Matrix.multiply(this.networkData.weights[0], this.networkData.inputs), this.networkOptions.activationFunction), this.networkData.biases[0]));
+        this.networkData.outputs.push(Matrix.add(Matrix.multiply(this.networkData.weights[0], this.networkData.inputs), this.networkData.biases[0]));
+        this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[0], this.networkOptions.activationFunction))
         for(var i = 1; i < this.networkOptions.dimensions.length - 1; i++) {
-            this.networkData.outputs.push(Matrix.add(Matrix.applyFunction(Matrix.multiply(this.networkData.weights[i], this.networkData.outputs[i - 1]), this.networkOptions.activationFunction), this.networkData.biases[i]));
+            this.networkData.outputs.push(Matrix.add(Matrix.multiply(this.networkData.weights[i], this.networkData.activations[i - 1]), this.networkData.biases[i]));
+            this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[this.networkData.outputs.length - 1], this.networkOptions.activationFunction));
         }
-        return this.networkData.outputs[this.networkData.outputs.length - 1];
-    }
-    calculateNetworkError(intendedOutput){
-        return Matrix.calculateSquareError(this.networkData.outputs[this.networkData.outputs.length - 1], intendedOutput);
+        this.backwardPass()
+        return this.networkData.activations[this.networkData.activations.length - 1];
     }
     backwardPass() {
-
+        
+    }
+    calculateCostMatrix(desiredMatrix) {
+        var layer = this.networkData.activations.length - 1;
+        console.log(
+            Matrix.multiply(
+                this.networkData.activations[layer - 1],
+                Matrix.transpose(
+                Matrix.multiplyScalar(
+                    Matrix.applyFunction(
+                        this.networkData.activations[layer],
+                        window[this.networkOptions.activationFunction.name + "Prime"]
+                    ),
+                    Matrix.calculateMeanSquareErrorPrime(
+                        this.networkData.activations[layer], 
+                        desiredMatrix
+                    )
+                )), 
+                
+            )
+        )
+        return Matrix.calculateMeanSquareError(this.networkData.activations[this.networkData.activations.length - 1], desiredMatrix);
     }
     initializeNetwork(minWeight, maxWeight, minBias, maxBias) {
         this.networkData.weights = [];
@@ -79,7 +101,7 @@ class NetworkOptions extends Struct {
     }
 }
 class NetworkData extends Struct {
-    constructor(inputs, outputs, weights, biases) {
+    constructor(inputs, outputs, activations, weights, biases) {
         super(NetworkData, arguments);
     }
 }

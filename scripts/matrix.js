@@ -64,6 +64,18 @@ class Matrix {
         }
         return new Matrix(resultArray);
     }
+    static multiplyScalar(matrix, scalar) {
+        var array = matrix.getMatrixAsArray();
+
+        var resultArray = [];
+        for(var i = 0; i < array.length; i++) {
+            resultArray.push([]);
+            for(var j = 0; j < array[i].length; j++) {
+                resultArray[i][j] = scalar * array[i][j];
+            }
+        }
+        return new Matrix(resultArray);
+    }
     static transpose(matrix) {
         var array = matrix.getMatrixAsArray();
         var matrixT = [];
@@ -75,18 +87,40 @@ class Matrix {
         }
         return new Matrix(matrixT);
     }
-    static calculateSquareError(matrix, intendedMatrix) {
+    static calculateMeanSquareError(matrix, intendedMatrix) {
        
-        var errorArray = []; 
+        var matrixArray = matrix.getMatrixAsArray();
+        var intendedMatrixArray = intendedMatrix.getMatrixAsArray();
+        var error = 0;
+        for(var i = 0; i < matrixArray.length; i++) {
+            for(var k = 0; k < matrixArray[i].length; k++) {
+                error += 1/2 * (matrixArray[i][k] - intendedMatrixArray[i][k]) ** 2
+            }
+        }
+        error /= matrixArray.length;
+        return error;
+    }
+    static calculateMeanSquareErrorPrime(matrix, intendedMatrix) {
+       
+        var error = 0; 
         var matrixArray = matrix.getMatrixAsArray();
         var intendedMatrixArray = intendedMatrix.getMatrixAsArray();
 
         for(var i = 0; i < matrixArray.length; i++) {
-            errorArray.push([]);
             for(var k = 0; k < matrixArray[i].length; k++) {
-                errorArray[i].push((matrixArray[i][k] - intendedMatrixArray[i][k]) ** 2);
+                error += matrixArray[i][k] - intendedMatrixArray[i][k];
             }
         }
-        return new Matrix(errorArray);
+        return error;
+    }
+    static grandSum(matrix) {
+        var matrixArray = matrix.getMatrixAsArray();
+        var sum = 0;
+        for(var i = 0; i < matrixArray.length; i++) {
+            for(var k = 0; k < matrixArray[i].length; k++) {
+                sum += matrixArray[i][k];
+            }
+        }
+        return sum;
     }
 }

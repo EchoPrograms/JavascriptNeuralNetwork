@@ -1,0 +1,11 @@
+cost:
+function:
+network:
+iterations: 
+training:
+================================================================================
+cost:
+function:
+network:
+iterations: 
+training:
