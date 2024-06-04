@@ -16,31 +16,38 @@ class Network {
             this.networkData.outputs.push(Matrix.add(Matrix.multiply(this.networkData.weights[i], this.networkData.activations[i - 1]), this.networkData.biases[i]));
             this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[this.networkData.outputs.length - 1], this.networkOptions.activationFunction));
         }
-        this.backwardPass()
         return this.networkData.activations[this.networkData.activations.length - 1];
     }
-    backwardPass() {
-        
-    }
-    calculateCostMatrix(desiredMatrix) {
+    backwardPass(desiredMatrix) {
+        /* testing:
+            var testNetwork = new Network(new NetworkOptions([2, 4, 2, 4], "leakyReLU", -1, 1, -1, 1))
+            testNetwork.forwardPass([[1],[2]])
+            testNetwork.backwardPass(new Matrix([[-5],[12],[3],[3]]))
+        */
         var layer = this.networkData.activations.length - 1;
         console.log(
-            Matrix.multiply(
-                this.networkData.activations[layer - 1],
+            Matrix.multiplyScalar(
                 Matrix.transpose(
-                Matrix.multiplyScalar(
-                    Matrix.applyFunction(
-                        this.networkData.activations[layer],
-                        window[this.networkOptions.activationFunction.name + "Prime"]
-                    ),
-                    Matrix.calculateMeanSquareErrorPrime(
-                        this.networkData.activations[layer], 
-                        desiredMatrix
+                    Matrix.multiply(
+                        this.networkData.activations[layer - 1],
+                        Matrix.transpose(
+                        Matrix.multiplyScalar(
+                            Matrix.applyFunction(
+                                this.networkData.activations[layer],
+                                window[this.networkOptions.activationFunction.name + "Prime"]
+                            ),
+                            Matrix.calculateMeanSquareErrorPrime(
+                                this.networkData.activations[layer], 
+                                desiredMatrix
+                            )
+                        )), 
                     )
-                )), 
-                
+                ),
+                -1
             )
         )
+    }
+    calculateCostMatrix(desiredMatrix) {
         return Matrix.calculateMeanSquareError(this.networkData.activations[this.networkData.activations.length - 1], desiredMatrix);
     }
     initializeNetwork(minWeight, maxWeight, minBias, maxBias) {
