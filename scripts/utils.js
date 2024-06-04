@@ -1,0 +1,46 @@
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
+function tanh(value) {
+    return Math.tanh(value);
+}
+function sin(value) {
+    return Math.sin(value);
+}
+function sigmoid(value) {
+    return 1 / (1 + Math.exp(-value));
+}
+function sigmoidPrime(value) {
+    return sigmoid(value) * (1 - sigmoid(value))
+}
+function reLU(value) {
+    return Math.max(0, value)
+}
+function reLUPrime(value) {
+    if(value > 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+function leakyReLU(value) {
+    return Math.max(0.01 * value, value)
+}
+function leakyReLUPrime(value) {
+    if(value > 0) {
+        return 1;
+    } else {
+        return 0.01;
+    }
+}
+class Struct {
+    constructor(childClass, paramValues) {
+        var params = childClass.toString().split("constructor(")[1].split(")")[0].split(", ");
+        for(var i = 0; i < params.length; i++) {
+            this[params[i]] = paramValues[i];
+        }
+    }
+}
