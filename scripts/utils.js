@@ -19,6 +19,12 @@ function sigmoidPrime(value) {
 function reLU(value) {
     return Math.max(0, value)
 }
+function linear(x) {
+    return x;
+}
+function linearPrime(x) {
+    return 1;
+}
 function reLUPrime(value) {
     if(value > 0) {
         return 1;

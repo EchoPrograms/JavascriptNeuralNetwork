@@ -8,7 +8,7 @@ class Network {
     }
     forwardPass(inputs) {
         this.networkData.outputs = [];
-        this.networkData.activations = []
+        this.networkData.activations = [] 
         this.networkData.inputs = new Matrix(inputs);
         this.networkData.outputs.push(Matrix.add(Matrix.multiply(this.networkData.weights[0], this.networkData.inputs), this.networkData.biases[0]));
         this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[0], this.networkOptions.activationFunction))
@@ -23,13 +23,25 @@ class Network {
             var testNetwork = new Network(new NetworkOptions([2, 4, 2, 4], "leakyReLU", -1, 1, -1, 1))
             testNetwork.forwardPass([[1],[2]])
             testNetwork.backwardPass(new Matrix([[-5],[12],[3],[3]]))
+
+            var testNetwork = new Network(new NetworkOptions([3, 2], "reLU", -1, 1, -1, 1))
+testNetwork.forwardPass([[1], [2], [3]])
+var goal = new Matrix([[-5],[1]])
+console.log(testNetwork.calculateCostMatrix(goal))
+for(var i = 0; i < 1000; i++) {
+    var gradientData = testNetwork.backwardPass(goal)
+    testNetwork.networkData.weights[0] = Matrix.add(testNetwork.networkData.weights[0], Matrix.multiplyScalar(gradientData.weightGradient, 0.0001))
+    testNetwork.networkData.biases[0] = Matrix.add(testNetwork.networkData.biases[0], Matrix.multiplyScalar(gradientData.biasGradient, 0.0001))
+    testNetwork.forwardPass([[1], [2], [3]])
+}
+    console.log(testNetwork.calculateCostMatrix(goal))
         */
         var layer = this.networkData.activations.length - 1;
         var inverseWeightGradient = 
             Matrix.multiplyScalar(
                 Matrix.transpose(
                     Matrix.multiply(
-                        this.networkData.activations[layer - 1],
+                        this.networkData.activations[layer - 1] ?? this.networkData.inputs,
                         Matrix.transpose(
                         Matrix.multiplyScalar(
                             Matrix.applyFunction(
@@ -63,9 +75,28 @@ class Network {
                     -1
                 )
             )
-        console.log(inverseWeightGradient)
-        console.log(inverseBiasGradient)
-        return inverseWeightGradient
+        var nextLayerGradient = 
+        Matrix.multiplyScalar(
+            Matrix.transpose(
+                Matrix.multiplyScalar(
+                    Matrix.transpose(
+                    Matrix.multiplyScalar(
+                        Matrix.applyFunction(
+                            this.networkData.activations[layer],
+                            window[this.networkOptions.activationFunction.name + "Prime"]
+                        ),
+                        Matrix.calculateMeanSquareErrorPrime(
+                            this.networkData.activations[layer], 
+                            desiredMatrix
+                        )
+                    )), 
+                    Matrix.grandSum(this.networkData.weights[layer])
+                )
+            ),
+            -1
+        )
+            
+        return {weightGradient: inverseWeightGradient, biasGradient: inverseBiasGradient, nextGradient: nextLayerGradient}
     }
     calculateCostMatrix(desiredMatrix) {
         return Matrix.calculateMeanSquareError(this.networkData.activations[this.networkData.activations.length - 1], desiredMatrix);

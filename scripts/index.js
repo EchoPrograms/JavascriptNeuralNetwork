@@ -9,7 +9,7 @@ var dimensions = [1, 10, 10, 1];
 
 var network = new Network(new NetworkOptions(dimensions, activationFunction, -1, 1, -1, 1));
 
-var goalFunction = (i)=>{return (Math.abs(Math.sin(i))+5*(Math.E)**(-(i**100))*Math.cos(i)) * (i > -3.15 && i < 3.15)}
+var goalFunction = sin//(i)=>{return (Math.abs(Math.sin(i))+5*(Math.E)**(-(i**100))*Math.cos(i)) * (i > -3.15 && i < 3.15)}
 var goalOutput = [];
 var xAxis = [];
 for(var i = xMin; i < xMax; i += step) {
