@@ -102,16 +102,16 @@ class Matrix {
     }
     static calculateMeanSquareErrorPrime(matrix, intendedMatrix) {
        
-        var error = 0; 
+        var errorGradient = []; 
         var matrixArray = matrix.getMatrixAsArray();
         var intendedMatrixArray = intendedMatrix.getMatrixAsArray();
 
         for(var i = 0; i < matrixArray.length; i++) {
             for(var k = 0; k < matrixArray[i].length; k++) {
-                error += matrixArray[i][k] - intendedMatrixArray[i][k];
+                errorGradient.push([(matrixArray[i][k] - intendedMatrixArray[i][k]) / matrixArray.length]);
             }
         }
-        return error;
+        return new Matrix(errorGradient);
     }
     static grandSum(matrix) {
         var matrixArray = matrix.getMatrixAsArray();
@@ -122,5 +122,33 @@ class Matrix {
             }
         }
         return sum;
+    }
+    static dotProduct(a, b) {
+        var arrayOne = a.getMatrixAsArray();
+        var arrayTwo = b.getMatrixAsArray();
+
+        if(arrayOne.length != arrayTwo.length || arrayOne[0].length != arrayTwo[0].length) {
+            console.error("Unequal Dimensions");
+            return;
+        }
+
+        var dotArray = [];
+        for(var i = 0; i < arrayOne.length; i++) {
+            dotArray.push([]);
+            for(var j = 0; j < arrayOne[i].length; j++) {
+                dotArray[i][j] = arrayOne[i][j] * arrayTwo[i][j];
+            }
+        }
+        return new Matrix(dotArray);
+    }
+    static outer(a, b) {
+        return Matrix.multiply(a, Matrix.transpose(b));
+    }
+    static average(matrixes) {
+        var resultantMatrix = matrixes[0];
+        for(var i = 1; i < matrixes.length; i++) {
+            resultantMatrix = Matrix.add(resultantMatrix, matrixes[i])
+        }
+        return Matrix.multiplyScalar(resultantMatrix, 1/matrixes.length);
     }
 }

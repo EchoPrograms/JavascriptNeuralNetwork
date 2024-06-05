@@ -7,8 +7,14 @@ function randomFloat(min, max) {
 function tanh(value) {
     return Math.tanh(value);
 }
+function tanhPrime(value) {
+    return 1 - tanh(value)**2
+}
 function sin(value) {
     return Math.sin(value);
+}
+function sinPrime(value) {
+    return Math.cos(value);
 }
 function sigmoid(value) {
     return 1 / (1 + Math.exp(-value));
@@ -33,13 +39,13 @@ function reLUPrime(value) {
     }
 }
 function leakyReLU(value) {
-    return Math.max(0.01 * value, value)
+    return Math.max(0.1 * value, value)
 }
 function leakyReLUPrime(value) {
     if(value > 0) {
         return 1;
     } else {
-        return 0.01;
+        return 0.1;
     }
 }
 class Struct {
@@ -49,4 +55,10 @@ class Struct {
             this[params[i]] = paramValues[i];
         }
     }
+}
+function clrTriangular(epoch, stepSize, minLR = 0.001, maxLR = 0.006) {
+    const cycle = Math.floor(1 + epoch / (2 * stepSize));
+    const x = Math.abs(epoch / stepSize - 2 * cycle + 1);
+    const lr = minLR + (maxLR - minLR) * Math.max(0, (1 - x));
+    return lr;
 }

@@ -8,15 +8,17 @@
                 background-color: #333;
             }
         </style>
-        <div id="graph" style="width:1000px;height: 500px;"></div>
+        <div id="graph" style="width:1000px;height: 500px;display: inline;"></div>
         <button onclick="regen()">Regen</button>
+        <button onclick="train()">Train</button>
+        <button onclick="stopTraining()">Stop training</button>
         <p style="color: white;" id="cost">Cost: </p>
-        <p style="color: white;" id="trainingIndex">Training index: </p>
-        
-        <script type="text/javascript" src="scripts/ploty.js"></script>
+        <p style="color: white;" id="trainingData"></p>
+        <p style="color: red;" id="errors"></p>
+        <script type="text/javascript" src="ploty.js"></script>
         <script type="text/javascript" src="scripts/utils.js"></script>
         <script type="text/javascript" src="scripts/matrix.js"></script>
         <script type="text/javascript" src="scripts/network.js"></script>
-        <script type="text/javascript" src="scripts/index.js"></script>
+        <script type="text/javascript" src="index.js"></script>
     </body>
 </html>

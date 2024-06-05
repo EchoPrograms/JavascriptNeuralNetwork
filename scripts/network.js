@@ -1,9 +1,13 @@
+var test;
 class Network {
     
     constructor(networkOptions) {
         this.networkData = new NetworkData();
-        this.networkOptions = networkOptions;
-        this.networkOptions.activationFunction = window[networkOptions.activationFunction]
+        this.networkOptions = Object.assign(new NetworkOptions(), networkOptions);
+        this.networkOptions.activationFunctions = []
+        for(var i = 0; i < networkOptions.dimensions.length - 1; i++) {
+            this.networkOptions.activationFunctions.push(window[networkOptions.activationFunctions[i] ?? networkOptions.activationFunctions[0]])
+        }
         this.initializeNetwork();
     }
     forwardPass(inputs) {
@@ -11,92 +15,60 @@ class Network {
         this.networkData.activations = [] 
         this.networkData.inputs = new Matrix(inputs);
         this.networkData.outputs.push(Matrix.add(Matrix.multiply(this.networkData.weights[0], this.networkData.inputs), this.networkData.biases[0]));
-        this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[0], this.networkOptions.activationFunction))
+        this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[0], this.networkOptions.activationFunctions[0]))
         for(var i = 1; i < this.networkOptions.dimensions.length - 1; i++) {
             this.networkData.outputs.push(Matrix.add(Matrix.multiply(this.networkData.weights[i], this.networkData.activations[i - 1]), this.networkData.biases[i]));
-            this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[this.networkData.outputs.length - 1], this.networkOptions.activationFunction));
+            this.networkData.activations.push(Matrix.applyFunction(this.networkData.outputs[this.networkData.outputs.length - 1], this.networkOptions.activationFunctions[i]));
         }
         return this.networkData.activations[this.networkData.activations.length - 1];
     }
     backwardPass(desiredMatrix) {
-        /* testing:
-            var testNetwork = new Network(new NetworkOptions([2, 4, 2, 4], "leakyReLU", -1, 1, -1, 1))
-            testNetwork.forwardPass([[1],[2]])
-            testNetwork.backwardPass(new Matrix([[-5],[12],[3],[3]]))
+        var layer = this.networkData.activations.length - 1
+        var gradient = Matrix.calculateMeanSquareErrorPrime(this.networkData.activations[layer], desiredMatrix);
 
-            var testNetwork = new Network(new NetworkOptions([3, 2], "reLU", -1, 1, -1, 1))
-testNetwork.forwardPass([[1], [2], [3]])
-var goal = new Matrix([[-5],[1]])
-console.log(testNetwork.calculateCostMatrix(goal))
-for(var i = 0; i < 1000; i++) {
-    var gradientData = testNetwork.backwardPass(goal)
-    testNetwork.networkData.weights[0] = Matrix.add(testNetwork.networkData.weights[0], Matrix.multiplyScalar(gradientData.weightGradient, 0.0001))
-    testNetwork.networkData.biases[0] = Matrix.add(testNetwork.networkData.biases[0], Matrix.multiplyScalar(gradientData.biasGradient, 0.0001))
-    testNetwork.forwardPass([[1], [2], [3]])
-}
-    console.log(testNetwork.calculateCostMatrix(goal))
-        */
-        var layer = this.networkData.activations.length - 1;
-        var inverseWeightGradient = 
-            Matrix.multiplyScalar(
-                Matrix.transpose(
-                    Matrix.multiply(
-                        this.networkData.activations[layer - 1] ?? this.networkData.inputs,
-                        Matrix.transpose(
-                        Matrix.multiplyScalar(
-                            Matrix.applyFunction(
-                                this.networkData.activations[layer],
-                                window[this.networkOptions.activationFunction.name + "Prime"]
-                            ),
-                            Matrix.calculateMeanSquareErrorPrime(
-                                this.networkData.activations[layer], 
-                                desiredMatrix
-                            )
-                        )), 
-                    )
-                ),
-                -1
-            )
-        var inverseBiasGradient = 
-            Matrix.transpose(
-                Matrix.multiplyScalar(
-                    Matrix.transpose(
-                        Matrix.multiplyScalar(
-                            Matrix.applyFunction(
-                                this.networkData.activations[layer],
-                                window[this.networkOptions.activationFunction.name + "Prime"]
-                            ),
-                            Matrix.calculateMeanSquareErrorPrime(
-                                this.networkData.activations[layer], 
-                                desiredMatrix
-                            )
-                        )
-                    ),
-                    -1
-                )
-            )
-        var nextLayerGradient = 
-        Matrix.multiplyScalar(
-            Matrix.transpose(
-                Matrix.multiplyScalar(
-                    Matrix.transpose(
-                    Matrix.multiplyScalar(
-                        Matrix.applyFunction(
-                            this.networkData.activations[layer],
-                            window[this.networkOptions.activationFunction.name + "Prime"]
-                        ),
-                        Matrix.calculateMeanSquareErrorPrime(
-                            this.networkData.activations[layer], 
-                            desiredMatrix
-                        )
-                    )), 
-                    Matrix.grandSum(this.networkData.weights[layer])
-                )
-            ),
-            -1
-        )
+        var weightGradients = [];
+        var biasGradients = [];
+
+        for(var i = layer; i >= 0; i--) {
+            var layerActivationDerivative = window[this.networkOptions.activationFunctions[i].name + "Prime"];
+            var currentLayerOutput = this.networkData.outputs[i] ?? this.networkData.inputs;
+            var previousLayerOutputs = this.networkData.activations[i - 1] ?? this.networkData.inputs;
+            var currentWeights = this.networkData.weights[i];
+
+            var activationGradient = Matrix.applyFunction(currentLayerOutput, layerActivationDerivative);
+            var gradientProducts = Matrix.dotProduct(gradient, activationGradient);
+    
+            var weightGradient = Matrix.outer(gradientProducts,previousLayerOutputs);
+            var biasGradient = gradientProducts;
+
+            weightGradients[i] = weightGradient;
+            biasGradients[i] = biasGradient;
+
+            var gradient = Matrix.multiply(Matrix.transpose(currentWeights), gradientProducts);
+        }
             
-        return {weightGradient: inverseWeightGradient, biasGradient: inverseBiasGradient, nextGradient: nextLayerGradient}
+        return {weightGradients: weightGradients, biasGradients: biasGradients}
+    }
+    trainOnPasses(trainingExamples, learningRate) {
+        var weightJacobians = trainingExamples.map(a => a.weightGradients);
+        var biasJacobians = trainingExamples.map(a => a.biasGradients);
+
+        var layerWeightJacobians = [];
+        var layerBiasJacobians = [];
+        var averagedWeightJacobians = [];
+        var averagedBiasJacobians = [];
+        for(var i = 0; i < weightJacobians[0].length; i++) {
+            layerWeightJacobians.push(weightJacobians.map(a => a[i]));
+            layerBiasJacobians.push(biasJacobians.map(a => a[i]));
+            averagedWeightJacobians.push(Matrix.average(layerWeightJacobians[i]));
+            averagedBiasJacobians.push(Matrix.average(layerBiasJacobians[i]));
+        }
+        for(var i = 0; i < averagedWeightJacobians.length; i++) {
+            var weightNudge = Matrix.multiplyScalar(averagedWeightJacobians[i], -learningRate);
+            var biasNudge = Matrix.multiplyScalar(averagedBiasJacobians[i], -learningRate);
+            this.networkData.weights[i] = Matrix.add(this.networkData.weights[i], weightNudge);
+            this.networkData.biases[i] = Matrix.add(this.networkData.biases[i], biasNudge);
+        }
     }
     calculateCostMatrix(desiredMatrix) {
         return Matrix.calculateMeanSquareError(this.networkData.activations[this.networkData.activations.length - 1], desiredMatrix);
@@ -154,7 +126,8 @@ for(var i = 0; i < 1000; i++) {
 }
 class NetworkOptions extends Struct {
     // dimensions: [int: input count, int: hidden layer count, ... , int: output count]
-    constructor(dimensions, activationFunction, minWeight, maxWeight, minBias, maxBias) {
+    // activationFunctions: [str: first hidden layer activation funct, ..., str: output layer activation funct]
+    constructor(dimensions, activationFunctions, minWeight, maxWeight, minBias, maxBias) {
         super(NetworkOptions, arguments);
     }
 }
@@ -163,3 +136,35 @@ class NetworkData extends Struct {
         super(NetworkData, arguments);
     }
 }
+
+
+/*
+
+
+
+var options = new NetworkOptions([1, 5, 3, 4, 2], ["reLU", "reLU", "reLU", "reLU"], -1, 1, -1, 1)
+var testNetwork = new Network(options)
+var gradientData = [];
+var goal = new Matrix([[3], [-0.5]])
+var goal2 = new Matrix([[1],[2]])
+var learningRate = 0.03;
+
+testNetwork.forwardPass([[-3]])
+console.log(testNetwork.calculateCostMatrix(goal))
+gradientData[0] = testNetwork.backwardPass(goal)
+
+
+testNetwork.forwardPass([[7]])
+console.log(testNetwork.calculateCostMatrix(goal2))
+gradientData[1] = testNetwork.backwardPass(goal2)
+
+testNetwork.trainOnPasses(gradientData, learningRate)
+
+testNetwork.forwardPass([[-3]])
+console.log(testNetwork.calculateCostMatrix(goal))
+testNetwork.forwardPass([[7]])
+console.log(testNetwork.calculateCostMatrix(goal2))
+
+
+
+*/
