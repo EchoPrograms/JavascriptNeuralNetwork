@@ -24,6 +24,8 @@
                 <span style="color: white;">Minimum Learning Rate: </span><input style="width:70px;" id="minimumLearningRate" type="number" value="0.01"><br>
                 <span style="color: white;">Maximum Learning Rate: </span><input style="width:70px;" id="maximumLearningRate" type="number" value="0.015"><br>
                 <span style="color: white;">Epochs per Half Cycle: </span><input style="width:50px;" id="halfCycleEpochs" type="number" value="50"><br>
+                <span style="color: white;">Resolution: </span><input style="width:50px;" id="resolution" type="number" value="0.1"><br>
+                <span style="color: white;">Plot Frequencey: </span><input style="width:50px;" id="plotFrequency" type="number" value="20"><br>
 
                 <button onclick="applyParamaters()">Apply</button><br>
 
@@ -32,6 +34,8 @@
                     <li><b>Minimum Learning Rate</b>: the minimum value the learning rate will oscillate to </li>
                     <li><b>Maximum Learning Rate</b>: the maximum value the learning rate will oscillate to</li>
                     <li><b>Epochs per Half Cycle</b>: how many epochs it will take for the learning rate to oscillate from min to max, or max to min.</li>
+                    <li><b>Resolution</b>: the step between the functions being sampled</li>
+                    <li><b>Plot Frequencey</b>: how often (in epochs) the cost will be calcuated and the plot will be updated</li>
                 </ul>
                 <hr>
                 <span style="font-family: monospace; color: #aaaaaa;">Goal Function: (x) => {</span><br>

@@ -14,8 +14,9 @@ var maxLearningRate = 0.015;
 var minLearningRate = 0.01;
 var halfCycleEpochs = 50;
 var maxEpochs = 1000
-var dimension = [1, 5, 1]
-var activations = ["tanh", "tanh"]
+var plotFrequency = 20;
+var dimension = [1, 5 ,5, 5, 1]
+var activations = ["reLU", "reLU", "reLU", "reLU"]
 var goalFunction = (x)=>{return sin(x)}
 
 var epoch = 0;
@@ -28,7 +29,7 @@ var goalFunction = (x)=>{return sin(x)}
 var goalOutput = [];
 var xAxis = [];
 
-var step = 0.01;
+var step = 0.1;
 var xMin = -10;
 var xMax = 10;
 
@@ -78,7 +79,9 @@ function train() {
         }
         var learningRateAdjusted = clrTriangular(epoch, halfCycleEpochs, minLearningRate, maxLearningRate)
         network.trainOnPasses(gradientData, learningRateAdjusted)
-        refreshGraphics()
+        if((epoch / plotFrequency) - Math.floor((epoch / plotFrequency)) == 0) {
+            refreshGraphics()
+        }
         trainingDataDisplay.innerHTML = `Epoch: ${epoch} <br> Learning rate: ${learningRateAdjusted}`
         if(epoch >= maxEpochs) {
             clearInterval(interval)
@@ -140,12 +143,16 @@ function applyParamaters() {
     minLearningRate = parseFloat(document.getElementById("minimumLearningRate").value);
     maxLearningRate = parseFloat(document.getElementById("maximumLearningRate").value);
     halfCycleEpochs = parseInt(document.getElementById("halfCycleEpochs").value);
+    step = parseFloat(document.getElementById("resolution").value);
+    plotFrequency = parseInt(document.getElementById("plotFrequency").value);
 }
 function applyGoalFunction() {
     var goalFunctionInput = document.getElementById("goalFunction");
     console.log(goalFunctionInput.value)
     goalOutput = []
+    xAxis = []
     for(var x = xMin; x < xMax; x += step) {
+        xAxis.push(x)
         goalOutput.push(eval(goalFunctionInput.value));
     }
     goalOutputMatrix = new Matrix([goalOutput]);
