@@ -16,6 +16,12 @@ function cos(value) {
 function cosPrime(value) {
     return -sin(value)
 }
+function siren(value){
+    return sin(30 * value);
+}
+function sirenPrime(value){
+    return 30 * cos(30 * value);
+}
 function sin(value) {
     return Math.sin(value);
 }
