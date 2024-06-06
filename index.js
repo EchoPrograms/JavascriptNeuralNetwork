@@ -154,6 +154,7 @@ function applyParamaters() {
     halfCycleEpochs = parseInt(document.getElementById("halfCycleEpochs").value);
     step = parseFloat(document.getElementById("resolution").value);
     plotFrequency = parseInt(document.getElementById("plotFrequency").value);
+    refreshGraphics()
 }
 function applyGoalFunction() {
     var goalFunctionInput = document.getElementById("goalFunction");
