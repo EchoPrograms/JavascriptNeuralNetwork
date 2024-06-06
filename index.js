@@ -170,3 +170,47 @@ function applyGoalFunction() {
 }
 showGoalFunctionCheckbox.addEventListener("click", refreshGraphics)
 showNetworkOutputCheckbox.addEventListener("click", refreshGraphics)
+function importNet() {
+    var importedObject = JSON.parse(atob(document.getElementById("importString").value))
+    network.import(importedObject.networkData)
+    layerCount.value = network.networkData.dimensions.length - 2;
+    setLayers()
+    var layerDescriptors = document.querySelectorAll('.layerDescriptor');
+    var activationFunctionDropdows = document.querySelectorAll('.activationFunctionDropdown');
+    for(var i = 0; i < parseInt(layerCount.value); i++) {
+        console.log(activationFunctionDropdows[i].childNodes[0])
+        layerDescriptors[i].childNodes[1].value = network.networkData.dimensions[i + 1]
+        activationFunctionDropdows[i].childNodes[0].value = network.networkOptions.activationFunctions[i].name
+    }
+    activationFunctionDropdows[activationFunctionDropdows.length - 1].childNodes[0].value = network.networkOptions.activationFunctions[network.networkOptions.activationFunctions.length - 1].name;
+    
+
+    document.getElementById("epochs").value = importedObject.uiData.epochs;
+    document.getElementById("minimumLearningRate").value = importedObject.uiData.minLearningRate
+    document.getElementById("maximumLearningRate").value = importedObject.uiData.maximumLearningRate
+    document.getElementById("halfCycleEpochs").value = importedObject.uiData.epochPerHalfCycle
+    document.getElementById("resolution").value = importedObject.uiData.resolution
+    document.getElementById("plotFrequency").value = importedObject.uiData.plotFrequency
+    document.getElementById("goalFunction").value = importedObject.uiData.targetFunction
+
+    applyParamaters()
+    applyGoalFunction()
+    setLayerContent()
+    network.import(importedObject.networkData)
+    refreshGraphics()
+}
+function exportNet() {
+    var exportObject = { 
+        networkData: network.export(),
+        uiData: {
+            epochs: document.getElementById("epochs").value, 
+            minLearningRate: document.getElementById("minimumLearningRate").value, 
+            maximumLearningRate: document.getElementById("maximumLearningRate").value, 
+            epochPerHalfCycle: document.getElementById("halfCycleEpochs").value, 
+            resolution: document.getElementById("resolution").value, 
+            plotFrequency: document.getElementById("plotFrequency").value,
+            targetFunction: document.getElementById("goalFunction").value
+        }
+    }
+    document.getElementById("exportLocation").innerHTML = btoa(JSON.stringify(exportObject))
+}

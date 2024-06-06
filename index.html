@@ -47,6 +47,10 @@
                 <span style="font-family: monospace; color: #aaaaaa;">   return <input id="goalFunction"></span><br>
                 <span style="font-family: monospace; color: #aaaaaa;">}</span><br><br>
                 <button onclick="applyGoalFunction()">Apply</button>
+                <hr>
+                <button onclick="exportNet()">export</button>
+                <p id="exportLocation" style="color: white; width: 500px; word-break: break-all;"></p>
+                <textarea id="importString" rows="10" cols="20"></textarea><button onclick="importNet()">import</button>
             </div>
         </div>
         <button onclick="regen()">Regen</button>
