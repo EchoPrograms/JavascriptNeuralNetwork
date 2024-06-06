@@ -107,7 +107,7 @@ class Network {
             networkSave.biases[i] = this.networkData.biases[i].getMatrixAsArray();
         }
         networkSave.dimensions = this.networkOptions.dimensions;
-        networkSave.activation = this.networkOptions.activationFunction.name;
+        networkSave.activationFunctions = this.networkOptions.activationFunctions.map(a => a.name);
         return encode ? btoa(JSON.stringify(networkSave)) : JSON.stringify(networkSave);
     }
     import(importCode, encoded) {
@@ -121,7 +121,10 @@ class Network {
             this.networkData.biases[i] = new Matrix(this.networkData.biases[i]);
         }
         this.networkData.dimensions = importedJSON.dimensions;
-        this.networkData.activation = importedJSON.activation;
+        this.networkOptions.activationFunctions = [];
+        for(var i = 0; i < importedJSON.dimensions.length - 1; i++) {
+            this.networkOptions.activationFunctions.push(window[importedJSON.activationFunctions[i] ?? importedJSON.activationFunctions[0]])
+        }
     }
 }
 class NetworkOptions extends Struct {
@@ -137,34 +140,3 @@ class NetworkData extends Struct {
     }
 }
 
-
-/*
-
-
-
-var options = new NetworkOptions([1, 5, 3, 4, 2], ["reLU", "reLU", "reLU", "reLU"], -1, 1, -1, 1)
-var testNetwork = new Network(options)
-var gradientData = [];
-var goal = new Matrix([[3], [-0.5]])
-var goal2 = new Matrix([[1],[2]])
-var learningRate = 0.03;
-
-testNetwork.forwardPass([[-3]])
-console.log(testNetwork.calculateCostMatrix(goal))
-gradientData[0] = testNetwork.backwardPass(goal)
-
-
-testNetwork.forwardPass([[7]])
-console.log(testNetwork.calculateCostMatrix(goal2))
-gradientData[1] = testNetwork.backwardPass(goal2)
-
-testNetwork.trainOnPasses(gradientData, learningRate)
-
-testNetwork.forwardPass([[-3]])
-console.log(testNetwork.calculateCostMatrix(goal))
-testNetwork.forwardPass([[7]])
-console.log(testNetwork.calculateCostMatrix(goal2))
-
-
-
-*/

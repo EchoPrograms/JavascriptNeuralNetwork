@@ -10,6 +10,12 @@ function tanh(value) {
 function tanhPrime(value) {
     return 1 - tanh(value)**2
 }
+function cos(value) {
+    return Math.cos(value)
+}
+function cosPrime(value) {
+    return -sin(value)
+}
 function sin(value) {
     return Math.sin(value);
 }
