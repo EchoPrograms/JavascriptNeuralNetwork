@@ -104,7 +104,7 @@ function stopTraining() {
 regen()
 
 // HyperParamater GUI
-var activationFunctionList = ["reLU", "leakyReLU", "sigmoid", "tanh", "sin", "cos", "linear"]
+var activationFunctionList = ["reLU", "leakyReLU", "sigmoid", "tanh", "sin", "cos", "siren", "linear"]
 var layerUIContainer = document.getElementById('layerUIContainer');
 var layerCount = document.getElementById('layerCount');
 var layerHTML = `<span style="color: white;" class="layerDescriptor">Hidden Layer, <input style="width:50px;" id="layerCount" type="number" value="5"> neuron(s), activation: <span class="activationFunctionDropdown"></span></span><br>`
