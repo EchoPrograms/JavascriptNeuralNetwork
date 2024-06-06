@@ -88,17 +88,18 @@ class Matrix {
         return new Matrix(matrixT);
     }
     static calculateMeanSquareError(matrix, intendedMatrix) {
-       
+
         var matrixArray = matrix.getMatrixAsArray();
         var intendedMatrixArray = intendedMatrix.getMatrixAsArray();
-        var error = 0;
+        var error = [];
         for(var i = 0; i < matrixArray.length; i++) {
+            error.push([])
             for(var k = 0; k < matrixArray[i].length; k++) {
-                error += 1/2 * (matrixArray[i][k] - intendedMatrixArray[i][k]) ** 2
+                error[i].push(1/2 * (matrixArray[i][k] - intendedMatrixArray[i][k]) ** 2)
             }
         }
-        error /= matrixArray.length;
-        return error;
+   
+        return new Matrix(error);
     }
     static calculateMeanSquareErrorPrime(matrix, intendedMatrix) {
        

@@ -18,7 +18,7 @@ var halfCycleEpochs = 50;
 var maxEpochs = 1000
 var plotFrequency = 20;
 var dimension = [1, 5 ,5, 5, 1]
-var activations = ["reLU", "reLU", "reLU", "reLU"]
+var activations = ["reLU", "reLU", "reLU", "linear"]
 var goalFunction = (x)=>{return sin(x)}
 
 var epoch = 0;
@@ -46,6 +46,7 @@ function regen() {
     network = new Network(options);
     refreshGraphics();
 }
+
 function refreshGraphics() {
     var networkOutput = [];
     if(showNetworkOutputCheckbox.checked) {
@@ -53,7 +54,8 @@ function refreshGraphics() {
             networkOutput.push(network.forwardPass([[i]]).getMatrixAsArray()[0][0]);
         }
     }
-    var cost = Matrix.calculateMeanSquareError(new Matrix([networkOutput]), new Matrix([goalOutput]));
+    var cost = Matrix.grandSum(Matrix.calculateMeanSquareError(new Matrix([networkOutput]), new Matrix([goalOutput]))) / (Math.abs(xMin)+Math.abs(xMax) / step);
+
     costDisplay.innerHTML = "Cost: " + cost;
     var graphs = []
     if(showNetworkOutputCheckbox.checked) {
@@ -125,6 +127,8 @@ function setLayers() {
     for(var i = 0; i < activationFunctionDropdows.length; i++) {
         activationFunctionDropdows[i].innerHTML = activationFunctionDropdownHTML;
     }
+    var layerDescriptors = document.querySelectorAll('.layerDescriptor')
+    layerDescriptors[layerDescriptors.length - 1].childNodes[1].childNodes[0].value = "linear"
 }
 function setLayerContent() {
     var dimensionsL = [1];
@@ -154,16 +158,16 @@ function applyParamaters() {
     halfCycleEpochs = parseInt(document.getElementById("halfCycleEpochs").value);
     step = parseFloat(document.getElementById("resolution").value);
     plotFrequency = parseInt(document.getElementById("plotFrequency").value);
+    applyGoalFunction()
     refreshGraphics()
 }
 function applyGoalFunction() {
     var goalFunctionInput = document.getElementById("goalFunction");
-    console.log(goalFunctionInput.value)
     goalOutput = []
     xAxis = []
     for(var x = xMin; x < xMax; x += step) {
         xAxis.push(x)
-        goalOutput.push(eval(goalFunctionInput.value));
+        goalOutput.push(eval(goalFunctionInput.value) ?? goalFunction(x));
     }
     goalOutputMatrix = new Matrix([goalOutput]);
 
@@ -179,7 +183,6 @@ function importNet() {
     var layerDescriptors = document.querySelectorAll('.layerDescriptor');
     var activationFunctionDropdows = document.querySelectorAll('.activationFunctionDropdown');
     for(var i = 0; i < parseInt(layerCount.value); i++) {
-        console.log(activationFunctionDropdows[i].childNodes[0])
         layerDescriptors[i].childNodes[1].value = network.networkData.dimensions[i + 1]
         activationFunctionDropdows[i].childNodes[0].value = network.networkOptions.activationFunctions[i].name
     }
