@@ -8,6 +8,8 @@ var graph = document.getElementById('graph');
 var costDisplay = document.getElementById("cost");
 var trainingDataDisplay = document.getElementById("trainingData")
 var logger = document.getElementById("errors")
+var showGoalFunctionCheckbox = document.getElementById("showGoalFunction")
+var showNetworkOutputCheckbox = document.getElementById("showNetworkOutput")
 
 
 var maxLearningRate = 0.015;
@@ -45,25 +47,32 @@ function regen() {
     refreshGraphics();
 }
 function refreshGraphics() {
-    
     var networkOutput = [];
-    for(var i = xMin; i < xMax; i += step) {
-        networkOutput.push(network.forwardPass([[i]]).getMatrixAsArray()[0][0]);
+    if(showNetworkOutputCheckbox.checked) {
+        for(var i = xMin; i < xMax; i += step) {
+            networkOutput.push(network.forwardPass([[i]]).getMatrixAsArray()[0][0]);
+        }
     }
     var cost = Matrix.calculateMeanSquareError(new Matrix([networkOutput]), new Matrix([goalOutput]));
     costDisplay.innerHTML = "Cost: " + cost;
+    var graphs = []
+    if(showNetworkOutputCheckbox.checked) {
+        graphs.push(
+            {
+                x: xAxis,
+                y: networkOutput 
+            })
+    }
+    if(showGoalFunctionCheckbox.checked) {
+        graphs.push(
+            {
+                x: xAxis,
+                y: goalOutput 
+            })
+    }
     Plotly.newPlot( 
             graph, 
-            [
-                {
-                    x: xAxis,
-                    y: networkOutput 
-                },
-                {
-                    x: xAxis,
-                    y: goalOutput 
-                }
-            ], 
+            graphs, 
             {
                 margin: { t: 0 } 
             } 
@@ -159,3 +168,5 @@ function applyGoalFunction() {
 
     refreshGraphics()
 }
+showGoalFunctionCheckbox.addEventListener("click", refreshGraphics)
+showNetworkOutputCheckbox.addEventListener("click", refreshGraphics)
