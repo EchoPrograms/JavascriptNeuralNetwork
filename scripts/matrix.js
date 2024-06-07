@@ -95,7 +95,7 @@ class Matrix {
         for(var i = 0; i < matrixArray.length; i++) {
             error.push([])
             for(var k = 0; k < matrixArray[i].length; k++) {
-                error[i].push(1/2 * (matrixArray[i][k] - intendedMatrixArray[i][k]) ** 2)
+                error[i].push((matrixArray[i][k] - intendedMatrixArray[i][k]) ** 2)
             }
         }
    
@@ -109,7 +109,7 @@ class Matrix {
 
         for(var i = 0; i < matrixArray.length; i++) {
             for(var k = 0; k < matrixArray[i].length; k++) {
-                errorGradient.push([(matrixArray[i][k] - intendedMatrixArray[i][k]) / matrixArray.length]);
+                errorGradient.push([(2*(matrixArray[i][k] - intendedMatrixArray[i][k])) / matrixArray.length]);
             }
         }
         return new Matrix(errorGradient);
