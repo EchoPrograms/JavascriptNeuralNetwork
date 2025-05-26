@@ -1,3 +1,24 @@
+const gpu = new GPU();
+
+var multiplyMatrixKernel = gpu.createKernel(function (a, b, sharedDim)  {
+  let sum = 0;
+  for (let i = 0; i < sharedDim; i++) {
+    sum += a[this.thread.y][i] * b[i][this.thread.x];
+  }
+  return a[this.thread.y][this.thread.x]
+  return sum;
+}).setOutput([2, 2])
+//.setDynamicOutput(true)
+
+function runMultiplication(A, B) {
+  const rowsA = A.length;
+  const colsA = A[0].length;
+  const colsB = B[0].length;
+//  multiplyMatrixKernel.setOutput([colsB, rowsA]);
+
+  return multiplyMatrixKernel(A, B, colsA);
+}
+
 class Matrix {
     #array;
     constructor(array) {
@@ -12,7 +33,15 @@ class Matrix {
     static multiply(a, b) {
         var arrayOne = a.getMatrixAsArray();
         var arrayTwo = b.getMatrixAsArray();
-        var multipliedArray = [];
+        console.log("Input:");
+        console.log(Matrix.arrayToString(arrayOne), "-----\n" , Matrix.arrayToString(arrayTwo));
+        var multipliedArray = runMultiplication(arrayOne, arrayTwo);
+        
+        console.log("Output:");
+        console.log(Matrix.arrayToString(multipliedArray));
+        //return new Matrix(multipliedArray);
+        multipliedArray = []; 
+        
 
         if(arrayOne[0].length != arrayTwo.length) {
             console.error("Invalid Dimensions");
@@ -29,7 +58,9 @@ class Matrix {
                 multipliedArray[i][j] = cellValue
             }   
         }
-
+        
+        console.log("Output:");
+        console.log(Matrix.arrayToString(multipliedArray));
         return new Matrix(multipliedArray);
     }
     static add(a, b) {
@@ -151,5 +182,29 @@ class Matrix {
             resultantMatrix = Matrix.add(resultantMatrix, matrixes[i])
         }
         return Matrix.multiplyScalar(resultantMatrix, 1/matrixes.length);
+    }
+    static toString(matrix) {
+        var outputStr = "";
+        var matrixArray = matrix.getMatrixAsArray();
+        for(var i = 0; i < matrixArray.length; i++) {
+            outputStr += "[ ";
+            for(var j = 0; j < matrixArray[i].length; j++) {
+                outputStr += matrixArray[i][j] + " ";
+            }
+            outputStr += "]\n";
+        }
+        return outputStr;
+    }
+    static arrayToString(array) {
+        var outputStr = "";
+        var matrixArray = array;
+        for(var i = 0; i < matrixArray.length; i++) {
+            outputStr += "[ ";
+            for(var j = 0; j < matrixArray[i].length; j++) {
+                outputStr += matrixArray[i][j] + " ";
+            }
+            outputStr += "]\n";
+        }
+        return outputStr;
     }
 }
